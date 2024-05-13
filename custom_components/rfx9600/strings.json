@@ -1,0 +1,22 @@
+{
+  "title": "Philips RFX9600",
+    "config": {
+      "error": {
+        "data": "You must enter the IP and Name of the RFX9600"
+      },
+      "step": {
+        "user": {
+          "data": {
+            "host": "IP Address of the RFX9600",
+            "name": "Name for the RFX0600 device",
+            "relay_1": "Name for relay_1",
+            "relay_2": "Name for relay_2",
+            "relay_3": "Name for relay_3",
+            "relay_4": "Name for relay_4"
+          },
+          "description": "Enter the details for your RFX9600.",
+          "title": "Philips RFX9600"
+        }
+      }
+    }
+  }
