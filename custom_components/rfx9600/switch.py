@@ -9,6 +9,8 @@ from .rfx9600 import RFX9600
 
 import voluptuous as vol
 
+import asyncio
+
 from homeassistant import config_entries, core
 
 from homeassistant.components.switch import (
@@ -143,11 +145,13 @@ class RFX9600Device(SwitchEntity):
 
 	async def async_turn_on(self, **kwargs):
 		await self._device.async_turn_on(self._port_number)
+		await asyncio.sleep(1)
 		self._device.state = True
 		self.async_schedule_update_ha_state(force_refresh=False)
 
 	async def async_turn_off(self, **kwargs):
 		await self._device.async_turn_off(self._port_number)
+		await asyncio.sleep(1)
 		self._device.state = False
 		self.async_schedule_update_ha_state(force_refresh=False)
 
