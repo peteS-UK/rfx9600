@@ -35,25 +35,21 @@ class RFX9600(object):
 		self._port_name = []
 		self.state = False
 		self._seq = 0
-		self._streams = {}
 
-	async def async_udp_connect(self, _port_number):
+	async def async_udp_connect(self):
+
 		_stream = None
 		try:
 			_stream = await asyncio_datagram.connect((self._ip, self._port))
-
 		except IOError as e:
 			_LOGGER.critical("Cannot connect command socket %d: %s", e.errno, e.strerror)
 		except:
 			_LOGGER.critical("Unknown error on command socket connection %s", sys.exc_info()[0])
+		return _stream
 
-		_LOGGER.debug("Connection for port %d", _port_number)
-
-		self._streams[_port_number] = _stream
-
-	async def async_udp_disconnect(self, _port_number):
+	async def async_udp_disconnect(self, _stream):
 		try:
-			self._streams[_port_number].close()
+			_stream.close()
 		except IOError as e:
 			_LOGGER.critical("Cannot disconnect from command socket %d: %s", e.errno, e.strerror)
 		except:
@@ -109,8 +105,6 @@ class RFX9600(object):
 
 
 
-
-
 	async def async_update(self, port_number):
 
 		command = RELAY_QUERY
@@ -138,68 +132,38 @@ class RFX9600(object):
 				_LOGGER.debug("Setting state to True for port number %d", port_number)
 				self.state = True
 
+
+
 	async def _async_send_command(self, command, port_number, _seq, ack = False):
 
-		try: 
-			await self._streams[port_number].send(command)
-		except:
-			try:
-				_LOGGER.debug("Connection lost.  Attepting to reconnect")
-				self.async_udp_connect(port_number)
-				await self._streams[port_number].send(command)
+		_stream = await self.async_udp_connect()
 
-			except IOError as e:
-				_LOGGER.critical("Cannot reconnect to command socket %d: %s", e.errno, e.strerror)
-			except:
-				_LOGGER.critical("Unknown error on command socket reconnection %s", sys.exc_info()[0])
+		if not _stream:
+			return
 
-		resp = None
-		_data = None
+		await _stream.send(command)
+
+#		try: 
+#			await _stream.send(command)
+#		except IOError as e:
+#			_LOGGER.critical("Cannot send to command socket %d: %s", e.errno, e.strerror)
+#		except:
+#			_LOGGER.critical("Unknown error on command socket send %s", sys.exc_info()[0])
 
 		if ack:
-			_packets = 0
-			while _packets < 5:
-				_packets = _packets+1
-				# get the next packet
-				try:
-					_data, remote_addr = await asyncio.wait_for(self._streams[port_number].recv(), timeout=0.1)
-					_LOGGER.debug("Seq %d, Data received %s with 3 %d", _seq, _data, _data[3])
-				except:
-					pass
-				# is it the right sequence
-				if _data:
-					if _data[0] == command [0] and _data[1] == command [1] and _data[2] == command [2]:
-						# is it the right packet
-						if _data[3] == 64:
-							resp = _data
-							_LOGGER.debug("Query response read")
-							_drain_counter = 0
-							while _data:
-								_data = None
-								_drain_counter = _drain_counter+1
-								try:
-									_data, remote_addr = await asyncio.wait_for(self._streams[port_number].recv(), timeout=0.1)
-								except:
-									pass
-							_LOGGER.debug("Drained %d packets for seq %d", _drain_counter, _seq)
-							break
-							
-						else:
-							_LOGGER.debug("Read packet for correct sequence, but not query response")
-					else:
-						_LOGGER.debug("Discarding packet from wrong sequence")
-				else:
-					_LOGGER.debug("No data received on query")
+			try:
+				_data, remote_addr = await asyncio.wait_for(_stream.recv(), timeout=0.2)
 				await asyncio.sleep(0.1)
-		else:
-			_drain_counter = 0
-			while True:
-				_drain_counter = _drain_counter+1
-				try:
-					_data, remote_addr = await asyncio.wait_for(self._streams[port_number].recv(), timeout=0.1)
-				except:
-					break
-				await asyncio.sleep(0.1)
-			_LOGGER.debug("Discarded %d packets for seq %d", _drain_counter, _seq)
+				_resp, remote_addr = await asyncio.wait_for(_stream.recv(), timeout=0.2)
+			except:
+				_LOGGER.debug("No query response received for port %d, seq %d",port_number, _seq )
+				self._resp = None
+				return
+			
+			if (_resp[0] == command [0] and _resp[1] == command [1] 
+	   				and _resp[2] == command [2] and _resp[3] == 64):
+					_LOGGER.debug("Query response received for port %d, seq %d",port_number, _seq)
+					self._resp = _resp
 
-		self._resp = resp
+		await self.async_udp_disconnect(_stream)
+		

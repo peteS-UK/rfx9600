@@ -56,7 +56,7 @@ PARALLEL_UPDATES = 1
 
 from datetime import timedelta
 
-SCAN_INTERVAL = timedelta(seconds=240)
+SCAN_INTERVAL = timedelta(seconds=300)
 
 async def async_setup_entry(
 	hass: core.HomeAssistant,
@@ -94,13 +94,14 @@ class RFX9600Device(SwitchEntity):
 		await self._device.async_update(self._port_number)
 
 	async def async_added_to_hass(self):
-		await self._device.async_udp_connect(self._port_number)
+		#await self._device.async_udp_connect(self._port_number)
 		#await self._device.async_update(self._port_number)
 		async_at_start(self._hass,  self._async_startup)
 
 	async def async_will_remove_from_hass(self) -> None:
 		
-		await self._device.async_udp_disconnect(self._port_number)
+		pass
+		#await self._device.async_udp_disconnect(self._port_number)
 
 
 	should_poll = True
