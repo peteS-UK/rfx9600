@@ -31,7 +31,7 @@ async def async_setup_entry(
 
 	rfx9600 = RFX9600(hass_data[CONF_HOST],hass_data[CONF_NAME])
 
-	await rfx9600.async_udp_connect()
+	# await rfx9600.async_udp_connect()
 
 	rfx9600._port_name.append(hass_data[CONF_RELAY_1])
 	rfx9600._port_name.append(hass_data[CONF_RELAY_2])
@@ -53,8 +53,8 @@ async def async_unload_entry(
 	"""Unload a config entry."""
 	if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
 		# Remove config entry from domain.
-		rfx9600 = hass.data[DOMAIN][entry.entry_id]["rfx9600"]
-		await rfx9600.async_udp_disconnect()
+		#rfx9600 = hass.data[DOMAIN][entry.entry_id]["rfx9600"]
+		#await rfx9600.async_udp_disconnect()
 		entry_data = hass.data[DOMAIN].pop(entry.entry_id)
 
 
