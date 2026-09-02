@@ -20,3 +20,31 @@ Once downloaded either via HACS or manually, restart your Home Assistant server.
 Configuration is done through the Home Assistant UI.  Once you're installed the integration, go into your Integrations (under Settings, Devices & Services), select Add Integration, and choose the Philips RFX9600 integration.
 
 This will display the configuration page, where you can select the IP address and name of the RFX.  You can also optionally name the relays, or leave them as their default values.
+
+## RS232 service
+
+The integration now exposes an action/service `rfx9600.send_rs232` to send serial commands over the RFX9600.
+
+Service data:
+
+- `port` (required): RS232 port number (`1`-`4`)
+- `command` (required): ASCII command string to send
+- `baud_rate` (required): one of `2400`, `4800`, `9600`, `14400`, `19200`, `28800`, `31250`, `38400`, `57600`, `115200`
+- `stop_bits` (required): `1`, `1.5`, or `2`
+- `parity` (required): `none`, `even`, `odd`, `mark`, or `space`
+- `data_bits` (required): `5`, `6`, `7`, or `8`
+- `duration_ms` (optional, default `500`)
+- `repeat_count` (optional, default `1`)
+
+Example:
+
+```yaml
+action: rfx9600.send_rs232
+data:
+  port: 1
+  command: "PWR ON\r"
+  baud_rate: 9600
+  stop_bits: 1
+  parity: none
+  data_bits: 8
+```
