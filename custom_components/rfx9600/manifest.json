@@ -1,9 +1,7 @@
 {
   "domain": "rfx9600",
   "name": "Philips RFX9600",
-  "categories": [
-    "buttons_remotes"
-  ],
+  "categories": "buttons_remotes",
   "codeowners": [
     "@peteS-UK"
   ],
