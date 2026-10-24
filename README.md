@@ -22,7 +22,11 @@ Once downloaded either via HACS or manually, restart your Home Assistant server.
 
 ## Configuration
 
-Configuration is done through the Home Assistant UI.  Once you're installed the integration, go into your Integrations (under Settings, Devices & Services), select Add Integration, and choose the Philips RFX9600 integration.
+Configuration is done through the Home Assistant UI.  Once you're installed the integration, go into your Integrations (under Settings, Devices & Services), select Add Integration, and choose the Philips RFX9600 integration, or click the shortcut button below (requires My Homeassistant configured).
+
+[![Add Integration to your Home Assistant
+instance.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=rfx9600)
+
 
 This will display the configuration page, where you can select the IP address and name of the RFX.  You can also optionally name the relays, or leave them as their default values.
 
