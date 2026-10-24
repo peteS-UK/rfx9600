@@ -31,8 +31,9 @@ class RFX9600:
         self._name = name
         self._port = 65442
         self._port_name = []
-        self.state = False
+        self.state = {port: False for port in range(1, 5)}
         self._seq = 0
+        self._resp = None
 
     def _next_sequence(self):
         if self._seq == 16777215:
@@ -56,7 +57,7 @@ class RFX9600:
                 "Cannot connect command socket %d: %s", e.errno, e.strerror
             )
         except Exception:
-            _LOGGER.critical(
+            _LOGGER.exception(
                 "Unknown error on command socket connection %s", sys.exc_info()[0]
             )
         return _stream
@@ -69,7 +70,7 @@ class RFX9600:
                 "Cannot disconnect from command socket %d: %s", e.errno, e.strerror
             )
         except Exception:
-            _LOGGER.critical(
+            _LOGGER.exception(
                 "Unknown error on command socket disconnection %s", sys.exc_info()[0]
             )
 
@@ -110,15 +111,16 @@ class RFX9600:
 
         self._set_sequence(command)
 
+        self._resp = None
         await self._async_send_command(bytes(command), port_number, self._seq, True)
 
         if self._resp:
             if self._resp[12] == 0:
                 _LOGGER.debug("Setting state to False for port number %d", port_number)
-                self.state = False
+                self.state[port_number] = False
             if self._resp[12] == 1:
                 _LOGGER.debug("Setting state to True for port number %d", port_number)
-                self.state = True
+                self.state[port_number] = True
 
     async def async_send_rs232(
         self,
@@ -207,33 +209,38 @@ class RFX9600:
         if not _stream:
             return
 
-        await _stream.send(command)
+        try:
+            await _stream.send(command)
 
-        if ack:
-            try:
-                _data, _remote_addr = await asyncio.wait_for(
-                    _stream.recv(), timeout=0.2
-                )
-                await asyncio.sleep(0.1)
-                _resp, _remote_addr = await asyncio.wait_for(
-                    _stream.recv(), timeout=0.2
-                )
-            except Exception:
-                _LOGGER.debug(
-                    "No query response received for port %d, seq %d", port_number, _seq
-                )
-                self._resp = None
-                return
+            if ack:
+                try:
+                    _data, _remote_addr = await asyncio.wait_for(
+                        _stream.recv(), timeout=0.2
+                    )
+                    await asyncio.sleep(0.1)
+                    _resp, _remote_addr = await asyncio.wait_for(
+                        _stream.recv(), timeout=0.2
+                    )
+                except Exception:
+                    _LOGGER.debug(
+                        "No query response received for port %d, seq %d",
+                        port_number,
+                        _seq,
+                    )
+                    self._resp = None
+                    return
 
-            if (
-                _resp[0] == command[0]
-                and _resp[1] == command[1]
-                and _resp[2] == command[2]
-                and _resp[3] == 64
-            ):
-                _LOGGER.debug(
-                    "Query response received for port %d, seq %d", port_number, _seq
-                )
-                self._resp = _resp
-
-        await self.async_udp_disconnect(_stream)
+                if (
+                    _resp[0] == command[0]
+                    and _resp[1] == command[1]
+                    and _resp[2] == command[2]
+                    and _resp[3] == 64
+                ):
+                    _LOGGER.debug(
+                        "Query response received for port %d, seq %d",
+                        port_number,
+                        _seq,
+                    )
+                    self._resp = _resp
+        finally:
+            await self.async_udp_disconnect(_stream)
