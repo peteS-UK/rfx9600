@@ -1,0 +1,125 @@
+send_rs232:
+  name: Send RS232 command
+  description: Send an RS232 command via a configured Philips RFX9600.
+  fields:
+    port:
+      name: Port
+      description: RS232 port number on the RFX9600.
+      required: true
+      example: 1
+      selector:
+        select:
+          options:
+            - label: "1"
+              value: "1"
+            - label: "2"
+              value: "2"
+            - label: "3"
+              value: "3"
+            - label: "4"
+              value: "4"
+    command:
+      name: Command
+      description: ASCII command string to send.
+      required: true
+      example: "PWR ON\r"
+      selector:
+        text:
+    baud_rate:
+      name: Baud rate
+      description: Serial baud rate.
+      required: true
+      example: 9600
+      selector:
+        select:
+          options:
+            - label: "2400"
+              value: "2400"
+            - label: "4800"
+              value: "4800"
+            - label: "9600"
+              value: "9600"
+            - label: "14400"
+              value: "14400"
+            - label: "19200"
+              value: "19200"
+            - label: "28800"
+              value: "28800"
+            - label: "31250"
+              value: "31250"
+            - label: "38400"
+              value: "38400"
+            - label: "57600"
+              value: "57600"
+            - label: "115200"
+              value: "115200"
+    stop_bits:
+      name: Stop bits
+      description: Serial stop bits.
+      required: true
+      example: 1
+      selector:
+        select:
+          options:
+            - label: "1"
+              value: "1"
+            - label: "1.5"
+              value: "1.5"
+            - label: "2"
+              value: "2"
+    parity:
+      name: Parity
+      description: Serial parity mode.
+      required: true
+      example: "none"
+      selector:
+        select:
+          options:
+            - label: "none"
+              value: "none"
+            - label: "even"
+              value: "even"
+            - label: "odd"
+              value: "odd"
+            - label: "mark"
+              value: "mark"
+            - label: "space"
+              value: "space"
+    data_bits:
+      name: Data bits
+      description: Number of serial data bits.
+      required: true
+      example: 8
+      selector:
+        select:
+          options:
+            - label: "5"
+              value: "5"
+            - label: "6"
+              value: "6"
+            - label: "7"
+              value: "7"
+            - label: "8"
+              value: "8"
+    duration_ms:
+      name: Duration (ms)
+      description: Frame duration in milliseconds.
+      example: 500
+      default: 500
+      selector:
+        number:
+          min: 1
+          max: 65535
+          step: 1
+          mode: box
+    repeat_count:
+      name: Repeat count
+      description: RS232 repeat count.
+      example: 1
+      default: 1
+      selector:
+        number:
+          min: 1
+          max: 255
+          step: 1
+          mode: box
