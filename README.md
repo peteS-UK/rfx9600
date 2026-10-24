@@ -1,6 +1,6 @@
 # Home Assistant to Philips RFX9600
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 [![maintained](https://img.shields.io/maintenance/yes/2026.svg)](#)
 [![maintainer](https://img.shields.io/badge/maintainer-%20%40petes--UK-blue.svg)](#)
 [![version](https://img.shields.io/github/v/release/peteS-UK/rfx9600)](#)
@@ -12,7 +12,9 @@ The integration is a Local Polling integration but polling is only every 240 sec
 
 ## Installation
 
-The preferred installation approach is via Home Assistant Community Store - aka [HACS](https://hacs.xyz/).  The repo is installable as a [Custom Repo](https://hacs.xyz/docs/faq/custom_repositories) via HACS.
+The preferred installation approach is via Home Assistant Community Store - aka [HACS](https://hacs.xyz/).  
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=peteS-UK&repository=rfx9600&category=integration)
 
 If you want to download the integration manually, create a new folder called rfx9600 under your custom_components folder in your config folder.  If the custom_components folder doesn't exist, create it first.  Once created, download the files and folders from the [github repo](https://github.com/peteS-UK/rfx9600/tree/main/custom_components/rfx9600) into this new rfx9600 folder.
 
