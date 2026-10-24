@@ -1,15 +1,12 @@
-"""The emotiva component."""
+"""The rfx9600 component."""
 
 import logging
 
-import voluptuous as vol
-from homeassistant import config_entries, core
-from homeassistant.const import Platform
-from homeassistant.const import CONF_HOST, CONF_NAME
-from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
-
-from .rfx9600 import RFX9600
+import probatio
+from homeassistant import config_entries, core
+from homeassistant.const import CONF_HOST, CONF_NAME, Platform
+from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
     CONF_BAUD_RATE,
@@ -27,33 +24,40 @@ from .const import (
     DOMAIN,
     SERVICE_SEND_RS232,
 )
+from .rfx9600 import RFX9600
 
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = [Platform.SWITCH]
 
-RS232_SERVICE_SCHEMA = vol.Schema(
+RS232_SERVICE_SCHEMA = probatio.Schema(
     {
-        vol.Required(CONF_COMMAND): cv.string,
-        vol.Required(CONF_PORT): vol.All(vol.Coerce(int), vol.Range(min=1, max=4)),
-        vol.Required(CONF_BAUD_RATE): vol.All(
-            vol.Coerce(int),
-            vol.In([2400, 4800, 9600, 14400, 19200, 28800, 31250, 38400, 57600, 115200]),
+        probatio.Required(CONF_COMMAND): cv.string,
+        probatio.Required(CONF_PORT): probatio.All(
+            probatio.Coerce(int), probatio.Range(min=1, max=4)
         ),
-        vol.Required(CONF_STOP_BITS): vol.All(
-            vol.Coerce(float), vol.In([1.0, 1.5, 2.0])
+        probatio.Required(CONF_BAUD_RATE): probatio.All(
+            probatio.Coerce(int),
+            probatio.In(
+                [2400, 4800, 9600, 14400, 19200, 28800, 31250, 38400, 57600, 115200]
+            ),
         ),
-        vol.Required(CONF_PARITY): vol.All(
-            cv.string, vol.Lower, vol.In(["none", "even", "odd", "mark", "space"])
+        probatio.Required(CONF_STOP_BITS): probatio.All(
+            probatio.Coerce(float), probatio.In([1.0, 1.5, 2.0])
         ),
-        vol.Required(CONF_DATA_BITS): vol.All(
-            vol.Coerce(int), vol.In([5, 6, 7, 8])
+        probatio.Required(CONF_PARITY): probatio.All(
+            cv.string,
+            probatio.Lower,
+            probatio.In(["none", "even", "odd", "mark", "space"]),
         ),
-        vol.Optional(CONF_DURATION_MS, default=500): vol.All(
-            vol.Coerce(int), vol.Range(min=1, max=65535)
+        probatio.Required(CONF_DATA_BITS): probatio.All(
+            probatio.Coerce(int), probatio.In([5, 6, 7, 8])
         ),
-        vol.Optional(CONF_REPEAT_COUNT, default=1): vol.All(
-            vol.Coerce(int), vol.Range(min=1, max=255)
+        probatio.Optional(CONF_DURATION_MS, default=500): probatio.All(
+            probatio.Coerce(int), probatio.Range(min=1, max=65535)
+        ),
+        probatio.Optional(CONF_REPEAT_COUNT, default=1): probatio.All(
+            probatio.Coerce(int), probatio.Range(min=1, max=255)
         ),
     }
 )
@@ -125,7 +129,9 @@ async def async_unload_entry(
         # rfx9600 = hass.data[DOMAIN][entry.entry_id]["rfx9600"]
         # await rfx9600.async_udp_disconnect()
         hass.data[DOMAIN].pop(entry.entry_id)
-        if not hass.data[DOMAIN] and hass.services.has_service(DOMAIN, SERVICE_SEND_RS232):
+        if not hass.data[DOMAIN] and hass.services.has_service(
+            DOMAIN, SERVICE_SEND_RS232
+        ):
             hass.services.async_remove(DOMAIN, SERVICE_SEND_RS232)
 
     return unload_ok
